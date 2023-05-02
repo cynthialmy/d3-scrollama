@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Movie Grene Distributions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <main>
+        <section class="generic" id="intro">
+            <h1>
+                Exploring the Evolution of Movie Genre Distributions: A Cinematic Journey Through Time
+            </h1>
+            <p>
+                Embark on a fascinating exploration of movie genre distributions over the years, as we delve into the
+                ever-evolving landscape of cinema from 1915 to 2013. Our journey takes us through the fluctuating
+                popularity of various genres, as well as the emergence of new cinematic trends. With each passing
+                decade, moviegoers' tastes and preferences have transformed, giving rise to unique storytelling
+                experiences and innovative styles that have shaped the film industry as we know it today.
+            </p>
+            <p id="scrollMsg">
+                <br />
+                SCROLL TO CONTINUE<br />
+                &#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;<br />
+            </p>
+            <p class="seperator">
+            </p>
+        </section>
+
+        <section id="scrolly">
+
+            <figure>
+                <div class="viz" id="chart0"></div>
+            </figure>
+
+            <article>
+
+                <div class="step" data-step="1">
+
+                    <h2>Exploring Hollywood's Genres</h2>
+                    <p>
+                        Delve into the diverse world of Hollywood genres, from timeless classics to modern masterpieces.
+                        With a rich history spanning over a century, the film industry has continuously evolved to
+                        captivate audiences through unique and innovative storytelling experiences across various
+                        genres.
+                    </p>
+                    <span class="label purple">Each dot represents a genre.
+                        Hover over a dot to check the genre.</span>
+                </div>
+
+                <div class="step" data-step="2">
+                    <h2>Genre by Sentiment Scores</h2>
+                    <p>
+                        Discover the correlation between movie genres and sentiment scores, shedding light on the
+                        emotional impact of different storytelling styles. Sentiment analysis reveals the genres that
+                        evoke strong emotions, and how these emotions contribute to a film's success and popularity.
+                    </p>
+                    <p style="font-size:18px;">
+                        <span class="label red">In general people really enjoy
+                            Drama, Documentary, and Advanture genres: they are above average score by more than 0.1.
+                        </span>
+                        <span class="label grey">Romance, Sci-Fi, Animation, Family and Fantasy
+                            are considered average go-to: they get around average score.</span>
+                        <span class="label green">Action, Comedy, Horror and
+                            Thriller are not usually liked: below average score by more than 0.1.</span>
+                    </p>
+                    <span class="label blue">Each dot represents a genre.
+                        Hover over a dot to check the genre.</span>
+                </div>
+
+                <div class="step" data-step="2">
+                    <h2>Number of Movies by Distribution Magnitude</h2>
+                    <p>
+                        Examine the distribution magnitude of movies across genres, revealing the evolving interests and
+                        demands of moviegoers. This analysis allows us to identify trends in the film industry and
+                        provides insights into the factors that influence the production and popularity of various
+                        genres.
+                    </p>
+                    <p style="font-size:18px;">
+                        <span class="label blue">
+                            There are a lot of movies in Drama and Action.
+                        </span>
+                    </p>
+                    <p style="font-size:18px;">
+                        <span class="label blue">
+                            Not many Anmation or Horror.
+                        </span>
+                    </p>
+                    <p style="font-size:18px;">
+                        <span class="label blue">
+                            Documentary is very very few.
+                        </span>
+                    </p>
+                    <span class="label blue">Each dot represents a genre.
+                        Hover over a dot to check the genre.</span>
+                </div>
+
+                <div class="step" data-step="3">
+                    <h2>Position in x-axis by sentiment</h2>
+                    <p>
+                        Explore the positioning of movie genres on the x-axis based on sentiment, showcasing how
+                        different genres trigger varying emotional responses. By understanding the connection between
+                        sentiment and genre, filmmakers can better cater to audience preferences and expectations.
+                    </p>
+                    <p style="font-size:18px;">
+                        <span class="label blue">
+                            Now we can see that people really dislike Horror movies!
+                        </span>
+                    </p>
+                    <p style="font-size:18px;">
+                        <span class="label blue">
+                            And they really really love Documentaries!!
+                        </span>
+                    </p>
+                </div>
+
+                <div class="step" data-step="4">
+                    <h2>Position in y-axis by magnitude</h2>
+                    <p>
+                        Uncover the relationship between movie genres and their magnitude on the y-axis, illustrating
+                        the influence of genre on a film's success. This analysis highlights the importance of selecting
+                        the right genre to maximize a movie's appeal and reach in the industry.
+                    </p>
+                    <p style="font-size:18px;">
+                        <span class="label blue">
+                            We do produce a lot of Drama, don't we?
+                        </span>
+                    </p>
+                </div>
+
+                <div class="step" data-step="5">
+                    <h2>Points in dots</h2>
+                    <p>
+                        Through the chart, we discover movie genres as dots, with Drama and Action having many movies,
+                        and Animation and Horror having few. Documentaries are rare, and people dislike Horror but love
+                        Documentaries.
+                        Drama movies are highly produced, leaving us with questions about the film industry and audience
+                        preferences.
+                    </p>
+                </div>
+
+                <div class="step" data-step="6">
+                    <h2>Stacking Up: A stacked bar chart</h2>
+                    <p>
+                        The stacked bar chart provides a concise overview of the film industry, highlighting the factors
+                        that contribute to a movie's success over time. It allows
+                        us to compare the performance of different movie genres, guiding our movie choices.
+                    </p>
+                    <span class="label blue">
+                        Hover over to check the genre.</span>
+                </div>
+
+                <div class="step" data-step="7">
+                    <h2>About the IMDB score</h2>
+                    <p>
+                        The IMDB score is a widely recognized benchmark for movie ratings, providing a valuable metric
+                        to gauge a film's success. By understanding the factors that influence IMDB scores, filmmakers
+                        can better tailor their productions to resonate with audiences and achieve higher ratings.
+                    <p style="font-size:18px;">
+                        <span class="label blue">
+                            Let's take a closer look at the IMDB scores, what else contribution to the success of a
+                            movie?
+                        </span>
+                    </p>
+
+                    </p>
+                </div>
+
+                <div class="step" data-step="8">
+                    <h2>Bubble Plot: IMDB Score Against Popularity and Budget</h2>
+                    <p>
+                        The bubble plot reveals that a director's reputation has a big impact on a movie's success,
+                        while budget and cast popularity have a lesser effect. High-budget movies tend to receive only
+                        mediocre scores. Casts, even unknown ones, can receive good or bad reviews based on their
+                        performances. Overall, this bubble plot sheds light on the complex interplay between the
+                        different elements that contribute to a movie's reception, providing us with valuable
+                        information for making informed decisions about the movies we watch.
+                    </p>
+                    <span class="label blue">
+                        Use a brush to interact with the graph.</span>
+                </div>
+                <div class="step" data-step="9">
+                    <h2>What about the score of the entire industry?</h2>
+                    <p>
+                        By examining the overall score of the film industry, we can gain a holistic understanding of the
+                        factors that contribute to the success of movies across genres. This analysis helps us identify
+                        trends and patterns in the industry, guiding future productions and strategies for success.
+                    </p>
+                </div>
+                <div class="step" data-step="10">
+                    <h2>Bar Chart: IMDB Scores Against the Number of Movies</h2>
+                    <p>
+                        A bar chart displaying IMDB scores against the number of movies provides a clear visualization
+                        of the distribution of movie ratings. The bar chart shows that movie ratings follow a Gaussian
+                        distribution, with most movies receiving scores within a certain range. This helps us make
+                        informed decisions about which movies to watch.
+                    </p>
+                </div>
+                <div class="step" data-step="11">
+                    <h2>The Conclusion</h2>
+                    <p>
+                        In conclusion, analyzing movie genre distributions, sentiment scores, and distribution
+                        magnitudes offers a fascinating insight into the history and evolution of cinema. As we look to
+                        the future, we can anticipate a continued diversification of genres and storytelling styles,
+                        opening up a world of cinematic possibilities for audiences to explore and enjoy.
+
+                    </p>
+                </div>
+            </article>
+
+        </section>
+
+        <section class="generic" id="outro">
+            <p class="seperator">
+            </p>
+            <p>
+            <h2>Outro</h2>
+            <p>
+                As we examine the movie genre distributions, it's intriguing to observe
+                the
+                ebb and flow of
+                different genres over the decades. The rise of independent cinema, foreign films, and
+                experimental storytelling has contributed to an increasingly diverse and multifaceted industry,
+                offering audiences a broad spectrum of experiences to choose from. With the continuous
+                advancements in film production, it's exciting to imagine the future possibilities and the
+                yet-to-be-discovered genres that will captivate the hearts and minds of moviegoers in the years
+                to come.
+
+            </p>
+            </p>
+        </section>
+        <section class="generic" id="footer">
+            <p>
+                <i>
+                    Acknowledgements
+                </i>
+            </p>
+            <p>
+                <i>
+                    References:
+                    This project is based on <a
+                        href="https://github.com/edriessen/scrollytelling-scrollama-d3-demo">scrollytelling-scrollama-d3-demo</a>
+                    by Erik Driessen.
+
+                </i>
+            </p>
+        </section>
+    </main>
+
+    <!--     <div class='debug'></div> -->
+    <script src="src/d3.5.9.1.min.js"></script>
+    <script src="src/intersection-observer.js"></script>
+    <script src="src/stickyfill.min.js"></script>
+    <script src="src/scrollama.min.js"></script>
+    <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+    <script src="data/movieScoreData.js"></script>
+    <script src="d3-animations.js"></script>
+    <script src="scrollama-settings.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.13.0/d3-legend.js"></script>
+</body>
+
+</html>
