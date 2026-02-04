@@ -8,22 +8,69 @@ var step = article.selectAll(".step");
 // initialize the scrollama
 var scroller = scrollama();
 
-// generic window resize listener event
+// generic window resize listener event with debouncing
+let resizeTimeout;
 function handleResize() {
-    // 1. update height of step elements
-    var stepH = Math.floor(window.innerHeight * 0.75);
-    step.style("height", stepH + "px");
-    step.style("width", "250px")
+    // Debounce resize events for better performance
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
 
-    var figureHeight = window.innerHeight / 2;
-    var figureMarginTop = (window.innerHeight - figureHeight) / 2;
+        // Responsive step height based on viewport
+        let stepH;
+        if (windowWidth <= 968) {
+            // Mobile/tablet: use viewport height
+            stepH = Math.floor(windowHeight * 0.6);
+        } else {
+            // Desktop: maintain aspect ratio
+            stepH = Math.floor(windowHeight * 0.75);
+        }
 
-    figure
-        .style("height", figureHeight + "px")
-        .style("top", figureMarginTop + "px");
+        step.style("height", stepH + "px");
 
-    // 3. tell scrollama to update new element dimensions
-    scroller.resize();
+        // Responsive step width
+        if (windowWidth <= 768) {
+            step.style("width", "100%");
+        } else if (windowWidth <= 1200) {
+            step.style("width", "100%");
+        } else {
+            step.style("width", "100%");
+        }
+
+        // Responsive figure height
+        let figureHeight;
+        if (windowWidth <= 968) {
+            // Stacked layout: use proportional height
+            figureHeight = Math.min(windowHeight * 0.5, 500);
+        } else {
+            // Side-by-side: maintain aspect ratio
+            figureHeight = Math.min(windowHeight * 0.6, 600);
+        }
+
+        // Update chart container height proportionally
+        const chartContainer = d3.select("#chart0");
+        if (!chartContainer.empty()) {
+            const currentWidth = chartContainer.node().offsetWidth;
+            const aspectRatio = 800 / 600; // Original aspect ratio
+            const newHeight = currentWidth / aspectRatio;
+            chartContainer.style("height", Math.min(newHeight, figureHeight) + "px");
+        }
+
+        // Update figure positioning for sticky behavior
+        if (windowWidth > 968) {
+            figure
+                .style("height", "auto")
+                .style("top", "50%");
+        } else {
+            figure
+                .style("height", "auto")
+                .style("top", "auto");
+        }
+
+        // Tell scrollama to update new element dimensions
+        scroller.resize();
+    }, 150); // 150ms debounce
 }
 
 // scrollama event handlers
@@ -42,10 +89,20 @@ function handleStepEnter(response) {
     let currentIndex = response.index;
     let currentDirection = response.direction;
 
-    // add color to current step only
+    // add color to current step only with smooth animation
     step.classed("is-active", function (d, i) {
         return i === currentIndex;
     });
+
+    // Animate step text with fade-in
+    d3.select(response.element)
+        .selectAll("h2, p")
+        .style("opacity", 0)
+        .transition()
+        .duration(600)
+        .delay((d, i) => i * 100)
+        .ease(d3.easeCubicOut)
+        .style("opacity", 1);
 
     // update graphic based on step
     switch (currentIndex) {
@@ -155,6 +212,17 @@ function setupStickyfill() {
 function init() {
     setupStickyfill();
 
+    // Hide loading overlay after a short delay
+    setTimeout(() => {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.add('hidden');
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 500);
+        }
+    }, 1500);
+
     // 1. force a resize on load to ensure proper dimensions are sent to scrollama
     handleResize();
 
@@ -165,9 +233,18 @@ function init() {
         .setup({
             step: "#scrolly article .step",
             offset: 0.5,
-            debug: false
+            debug: false,
+            progress: true
         })
-        .onStepEnter(handleStepEnter);
+        .onStepEnter(handleStepEnter)
+        .onStepProgress(function(response) {
+            // Optional: Add progress-based animations
+            const progress = response.progress;
+            if (response.element) {
+                d3.select(response.element)
+                    .style("opacity", 0.5 + progress * 0.5);
+            }
+        });
 
     // setup resize event
     window.addEventListener("resize", handleResize);

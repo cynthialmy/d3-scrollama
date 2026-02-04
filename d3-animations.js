@@ -1,27 +1,99 @@
 // set the dimensions and margins of the graph
-const margin = { top: 50, right: 25, bottom: 45, left: 80 },
-    width = 800 - margin.left - margin.right,
-    height = 600 - margin.top - margin.bottom;
+const margin = { top: 50, right: 25, bottom: 45, left: 80 };
+const baseWidth = 800;
+const baseHeight = 600;
+const width = baseWidth - margin.left - margin.right;
+const height = baseHeight - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
-const svg = d3.select("#chart0")
+const svgRoot = d3.select("#chart0")
     .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("viewBox", `0 0 ${baseWidth} ${baseHeight}`)
+    .attr("preserveAspectRatio", "xMidYMid meet");
+
+// Create gradient definitions for bubbles (must be in SVG root, not in group)
+const defs = svgRoot.append("defs");
+
+// Create the main group for chart elements
+const svg = svgRoot
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-// set colours for plot
+// Gold gradient for positive sentiment
+const goldGradient = defs.append("linearGradient")
+    .attr("id", "goldGradient")
+    .attr("x1", "0%").attr("y1", "0%")
+    .attr("x2", "100%").attr("y2", "100%");
+goldGradient.append("stop").attr("offset", "0%").attr("stop-color", "#ffd700").attr("stop-opacity", 1);
+goldGradient.append("stop").attr("offset", "100%").attr("stop-color", "#ffaa00").attr("stop-opacity", 1);
+
+// Red gradient for negative sentiment
+const redGradient = defs.append("linearGradient")
+    .attr("id", "redGradient")
+    .attr("x1", "0%").attr("y1", "0%")
+    .attr("x2", "100%").attr("y2", "100%");
+redGradient.append("stop").attr("offset", "0%").attr("stop-color", "#e63946").attr("stop-opacity", 1);
+redGradient.append("stop").attr("offset", "100%").attr("stop-color", "#c41e3a").attr("stop-opacity", 1);
+
+// Silver gradient for neutral
+const silverGradient = defs.append("linearGradient")
+    .attr("id", "silverGradient")
+    .attr("x1", "0%").attr("y1", "0%")
+    .attr("x2", "100%").attr("y2", "100%");
+silverGradient.append("stop").attr("offset", "0%").attr("stop-color", "#c0c0c0").attr("stop-opacity", 1);
+silverGradient.append("stop").attr("offset", "100%").attr("stop-color", "#8c8274").attr("stop-opacity", 1);
+
+// Blue gradient for interactive elements
+const blueGradient = defs.append("linearGradient")
+    .attr("id", "blueGradient")
+    .attr("x1", "0%").attr("y1", "0%")
+    .attr("x2", "100%").attr("y2", "100%");
+blueGradient.append("stop").attr("offset", "0%").attr("stop-color", "#00d4ff").attr("stop-opacity", 1);
+blueGradient.append("stop").attr("offset", "100%").attr("stop-color", "#0d47a1").attr("stop-opacity", 1);
+
+// Glow filter for bubbles
+const glowFilter = defs.append("filter")
+    .attr("id", "glow")
+    .attr("x", "-50%")
+    .attr("y", "-50%")
+    .attr("width", "200%")
+    .attr("height", "200%");
+glowFilter.append("feGaussianBlur")
+    .attr("stdDeviation", "4")
+    .attr("result", "coloredBlur");
+const feMerge = glowFilter.append("feMerge");
+feMerge.append("feMergeNode").attr("in", "coloredBlur");
+feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+// Strong glow filter
+const strongGlowFilter = defs.append("filter")
+    .attr("id", "strongGlow")
+    .attr("x", "-50%")
+    .attr("y", "-50%")
+    .attr("width", "200%")
+    .attr("height", "200%");
+strongGlowFilter.append("feGaussianBlur")
+    .attr("stdDeviation", "8")
+    .attr("result", "coloredBlur");
+const feMergeStrong = strongGlowFilter.append("feMerge");
+feMergeStrong.append("feMergeNode").attr("in", "coloredBlur");
+feMergeStrong.append("feMergeNode").attr("in", "SourceGraphic");
+
+// set colours for plot (updated to match new theme)
 const color_mapping = {
-    red: '#ef8a62',
-    grey: '#777',
-    green: '#67a9cf'
+    red: '#e63946',
+    grey: '#c0c0c0',
+    green: '#00d4ff',
+    gold: '#ffd700',
+    amber: '#ffaa00'
 }
 
-// Add X axis
+// Add X axis (using base width for viewBox scaling)
 const x = d3.scaleLinear()
     .domain([0, 13])
-    .range([0, width]);
+    .range([0, baseWidth - margin.left - margin.right]);
 
 svg.append("g")
     .attr("transform", `translate(0, ${height})`)
@@ -48,58 +120,94 @@ var tooltip = d3.select("#chart0")
     .append("div")
     .style("opacity", 0)
     .attr("class", "tooltip")
+    .style("left", "0px")
+    .style("top", "0px")
 
 // change tooltip text based on position in story
 function returnTooltipText(step, d) {
-
     switch (step) {
         case 'title':
-            return d.index + ": " + d.title
+            return `<strong style="color: #ffd700;">${d.index}: ${d.title}</strong>`
             break;
         case 'title score':
-            return d.index + ": " + d.title +
-                " - sentiment score: " + d.score
+            const scoreColor = d.score > 0.1 ? '#00d4ff' : d.score < -0.1 ? '#e63946' : '#c0c0c0';
+            return `<strong style="color: #ffd700;">${d.index}: ${d.title}</strong><br/>
+                    <span style="color: ${scoreColor};">Sentiment: ${d.score.toFixed(3)}</span>`
             break;
         case 'title score magnitude':
-            return d.index + ": " + d.title +
-                " - sentiment score: " + d.score +
-                " - magnitude: " + d.magnitude
+            const scoreColor2 = d.score > 0.1 ? '#00d4ff' : d.score < -0.1 ? '#e63946' : '#c0c0c0';
+            return `<strong style="color: #ffd700;">${d.index}: ${d.title}</strong><br/>
+                    <span style="color: ${scoreColor2};">Sentiment: ${d.score.toFixed(3)}</span><br/>
+                    <span style="color: #c0c0c0;">Magnitude: ${d.magnitude.toLocaleString()}</span>`
             break;
     }
-
 }
 
 // create 2 functions to show and hide the tooltip
-var showTooltip = function (d) {
+var showTooltip = function (event, d) {
     tooltip
         .transition()
-        .duration(200)
-    tooltip
+        .duration(300)
         .style("opacity", 1)
         .html(returnTooltipText(toolTipState, d))
+
+    // Get mouse position relative to the chart container
+    const chartRect = d3.select("#chart0").node().getBoundingClientRect();
+    const [x, y] = d3.pointer(event, d3.select("#chart0").node());
+
+    tooltip
+        .style("left", (x + 20) + "px")
+        .style("top", (y - 10) + "px")
 }
 
 var hideTooltip = function (d) {
     tooltip
         .transition()
-        .duration(200)
+        .duration(300)
         .style("opacity", 0)
 }
 
-// add bubble chart
+// add bubble chart with staggered entrance animation
 const bubbleChart = svg.append('g')
     .attr("class", "chart")
-    .selectAll("dot")
+    .selectAll("circle.bubbles")
     .data(data)
     .join("circle")
     .attr("class", "bubbles")
     .attr("cx", d => x(d.index))
     .attr("cy", d => y(1))
+    .attr("r", 0)
+    .style("fill", "url(#silverGradient)")
+    .style("stroke", "#ffd700")
+    .style("stroke-width", 2)
+    .attr("filter", "url(#glow)")
+    .on("mouseover", function(event, d) {
+        showTooltip(event, d);
+        d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("filter", "url(#strongGlow)")
+            .attr("r", function() { return parseFloat(d3.select(this).attr("r")) * 1.2; })
+    })
+    .on("mousemove", function(event, d) {
+        showTooltip(event, d);
+    })
+    .on("mouseleave", function(event, d) {
+        d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("filter", "url(#glow)")
+            .attr("r", function() { return parseFloat(d3.select(this).attr("r")) / 1.2; })
+        hideTooltip(d);
+    })
+
+// Staggered entrance animation
+bubbleChart
+    .transition()
+    .delay((d, i) => i * 100)
+    .duration(800)
+    .ease(d3.easeElasticOut)
     .attr("r", 10)
-    .style("fill", "#F2E8DC")
-    .attr("stroke", "white")
-    .on("mouseover", showTooltip)
-    .on("mouseleave", hideTooltip)
 
 let bubbleRadius = 'pop'
 var xAxis = d3.axisBottom().scale(x);
@@ -111,26 +219,41 @@ function dotColorGrey() {
     bubbleChart
         .data(data)
         .transition()
-        .duration(1000)
+        .duration(1200)
+        .ease(d3.easeCubicInOut)
         .attr("r", 10)
-        .style("fill", "#F2E8DC")
+        .style("fill", "url(#silverGradient)")
+        .style("stroke", "#ffd700")
+        .style("stroke-width", 2)
 }
 
 function dotColorSentiment() {
     bubbleChart
         .data(data)
         .transition()
-        .duration(1000)
+        .duration(1200)
+        .ease(d3.easeCubicInOut)
+        .delay((d, i) => i * 50)
         .attr("r", 10)
         .style("fill", function (d) {
             if (d.score > 0.1) {
-                return color_mapping.green
+                return "url(#goldGradient)"
             } else if (d.score < -0.1) {
-                return color_mapping.red
+                return "url(#redGradient)"
             } else {
-                return color_mapping.grey
+                return "url(#silverGradient)"
             }
         })
+        .style("stroke", function (d) {
+            if (d.score > 0.1) {
+                return "#ffd700"
+            } else if (d.score < -0.1) {
+                return "#e63946"
+            } else {
+                return "#c0c0c0"
+            }
+        })
+        .style("stroke-width", 2)
 }
 
 function dotResize() {
@@ -159,36 +282,52 @@ function dotResize() {
 }
 
 function dotPositionScore() {
-    x.domain([-.8, .8]);
+    x.domain([-.8, .8])
+        .range([0, baseWidth - margin.left - margin.right]);
 
     svg.selectAll(".Xaxis")
         .transition()
-        .duration(1000)
+        .duration(1200)
+        .ease(d3.easeCubicInOut)
         .style("opacity", 1)
         .call(xAxis);
 
-
-    y.domain([0, 2]);
+    y.domain([0, 2])
+        .range([baseHeight - margin.top - margin.bottom, 0]);
 
     svg.selectAll(".Yaxis")
         .transition()
-        .duration(1000)
+        .duration(1200)
+        .ease(d3.easeCubicInOut)
         .call(yAxis);
 
     bubbleChart
         .data(data)
         .transition()
-        .duration(1000)
+        .duration(1500)
+        .ease(d3.easeCubicInOut)
+        .delay((d, i) => i * 60)
         .attr("cx", d => x(d.score))
         .attr("cy", d => y(1))
+        .style("fill", function (d) {
+            if (d.score > 0.1) {
+                return "url(#goldGradient)"
+            } else if (d.score < -0.1) {
+                return "url(#redGradient)"
+            } else {
+                return "url(#silverGradient)"
+            }
+        })
 }
 
 function dotPositionMagnitude() {
-    y.domain([1, d3.max(data, function (d) { return d.magnitude + 1 })]);
+    y.domain([1, d3.max(data, function (d) { return d.magnitude + 1 })])
+        .range([baseHeight - margin.top - margin.bottom, 0]);
 
     svg.selectAll(".Yaxis")
         .transition()
-        .duration(1000)
+        .duration(1200)
+        .ease(d3.easeCubicInOut)
         .style("opacity", 1)
         .call(yAxis);
 
@@ -213,10 +352,13 @@ function dotSimplify() {
     bubbleChart
         .data(data)
         .transition()
-        .duration(1000)
-        .style("fill", "black")
+        .duration(1200)
+        .ease(d3.easeCubicInOut)
+        .style("fill", "#1a1a2e")
+        .style("stroke", "#ffd700")
+        .style("stroke-width", 1)
         .attr("r", 5)
-
+        .attr("filter", "url(#glow)")
 }
 
 function toggleAxesOpacity(toggleX, toggleY, opacity) {
@@ -249,21 +391,23 @@ function drawStraightPath() {
             }
         }
 
-        window.line = d3.select(".chart")
-            .append("path")
+        window.line = svg.append("path")
             .attr("class", "straight")
             .attr("d", path)
+            .attr("stroke", "url(#goldGradient)")
+            .attr("fill", "none")
+            .attr("stroke-width", 3)
+            .attr("filter", "url(#glow)")
 
         window.totalLength = line.node().getTotalLength()
     }
 
     line
-        .attr("stroke", "#F2E8DC")
-        .attr("fill", "none")
         .attr("stroke-dasharray", totalLength + " " + totalLength)
         .attr("stroke-dashoffset", totalLength)
         .transition()
         .duration(3000)
+        .ease(d3.easeLinear)
         .attr("stroke-dashoffset", 0)
 }
 
@@ -345,18 +489,38 @@ function drawDotChart() {
     var brushContainer1 = chart1.append('g').attr("id", "brushContainer1")
     var brushContainer2 = chart2.append('g').attr("id", "brushContainer2")
 
+    // Create gradient for IMDB score ranges
+    const scoreGradients = {};
+    const scoreRanges = [
+        { min: 0, max: 2, colors: ['#c41e3a', '#8b0000'] },
+        { min: 2, max: 4, colors: ['#e63946', '#c41e3a'] },
+        { min: 4, max: 6, colors: ['#8c8274', '#6b6358'] },
+        { min: 6, max: 8, colors: ['#00d4ff', '#0099cc'] },
+        { min: 8, max: 10, colors: ['#ffd700', '#ffaa00'] }
+    ];
+
+    scoreRanges.forEach((range, idx) => {
+        const grad = defs.append("radialGradient")
+            .attr("id", `scoreGradient-${idx}`)
+            .attr("cx", "50%").attr("cy", "50%");
+        grad.append("stop").attr("offset", "0%").attr("stop-color", range.colors[0]).attr("stop-opacity", 0.9);
+        grad.append("stop").attr("offset", "100%").attr("stop-color", range.colors[1]).attr("stop-opacity", 0.7);
+        scoreGradients[`${range.min}-${range.max}`] = `url(#scoreGradient-${idx})`;
+    });
+
     function getFillColor(d) {
-        if (d.imdb_score > 0 && d.imdb_score < 2) {
-            return "#f0f9e8";
+        if (d.imdb_score >= 0 && d.imdb_score < 2) {
+            return scoreGradients['0-2'];
         } else if (d.imdb_score >= 2 && d.imdb_score < 4) {
-            return "#bae4bc";
+            return scoreGradients['2-4'];
         } else if (d.imdb_score >= 4 && d.imdb_score < 6) {
-            return "#7bccc4";
+            return scoreGradients['4-6'];
         } else if (d.imdb_score >= 6 && d.imdb_score < 8) {
-            return "#43a2ca";
+            return scoreGradients['6-8'];
         } else if (d.imdb_score >= 8) {
-            return "#0868ac";
+            return scoreGradients['8-10'];
         }
+        return scoreGradients['4-6'];
     }
 
     function updateChart3(d) {
@@ -384,20 +548,41 @@ function drawDotChart() {
         .append("circle")
         .attr("id", (d, i) => i)
         .attr("fill", d => getFillColor(d))
-        .style("stroke", "black")
-        .style("opacity", 0.75)
+        .style("stroke", "#ffd700")
+        .style("stroke-width", 1.5)
+        .style("opacity", 0.85)
         .attr("cx", d => (d.movie_title !== "Treachery" && d.movie_title !== "Hardflip" && d.movie_title !== "kickboxer: vengeance") ? xScale(d.director_facebook_likes) : undefined)
         .attr("cy", d => yScale(d.imdb_score))
+        .attr("r", 0)
+        .attr("filter", "url(#glow)")
+        .on("mouseenter", function() {
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .attr("filter", "url(#strongGlow)")
+                .style("stroke-width", 3)
+                .attr("r", function() { return parseFloat(d3.select(this).attr("r")) * 1.3; });
+        })
+        .on("mouseleave", function() {
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .attr("filter", "url(#glow)")
+                .style("stroke-width", 1.5)
+                .attr("r", function(d) { return (d.budget / 30000000) + 3; });
+        })
         .on("click", function (d) {
             circleClickHandler.call(this, d, chart2);
         })
         .transition()
-        .duration(1000)
+        .duration(1200)
+        .ease(d3.easeElasticOut)
+        .delay((d, i) => i * 2)
         .attr("r", d => (d.budget / 30000000) + 3);
 
     chart1.append("text")
-        .attr("x", width - 700)
-        .attr("y", height - 5)
+        .attr("x", baseWidth - 700)
+        .attr("y", baseHeight - 5)
         .text("Popularity of the Director (FB Likes))");
 
     chart1.append("text")
@@ -410,11 +595,11 @@ function drawDotChart() {
 
     chart1
         .append("g") // create a group node
-        .attr("transform", "translate(0," + (width - 20) + ")")
+        .attr("transform", "translate(0," + (baseHeight - 20) + ")")
         .call(xAxis) // call the axis generator
         .append("text")
         .attr("class", "label")
-        .attr("x", width - 16)
+        .attr("x", baseWidth - 16)
         .attr("y", -6)
         .style("text-anchor", "end")
         .text("Duration of Film");
@@ -447,26 +632,47 @@ function drawDotChart() {
         .append("circle")
         .attr("id", function (d, i) { return i; })
         .attr("fill", d => getFillColor(d))
-        .style("stroke", "black")
-        .style("opacity", .75)
+        .style("stroke", "#ffd700")
+        .style("stroke-width", 1.5)
+        .style("opacity", 0.85)
         .attr("cx", function (d) {
             if (d.movie_title != "Treachery" || d.movie_title != "Hardflip" || d.movie_title != "kickboxer: vengeance") {
                 return xScale2(d.cast_total_facebook_likes);
             }
         })
         .attr("cy", function (d) { return yScale2(d.imdb_score); })
+        .attr("r", 0)
+        .attr("filter", "url(#glow)")
+        .on("mouseenter", function() {
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .attr("filter", "url(#strongGlow)")
+                .style("stroke-width", 3)
+                .attr("r", function() { return parseFloat(d3.select(this).attr("r")) * 1.3; });
+        })
+        .on("mouseleave", function() {
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .attr("filter", "url(#glow)")
+                .style("stroke-width", 1.5)
+                .attr("r", function(d) { return (d.budget / 30000000) + 3; });
+        })
         .on("click", function (d) {
             circleClickHandler.call(this, d, chart1);
         })
         .transition()
-        .duration(1000)
+        .duration(1200)
+        .ease(d3.easeElasticOut)
+        .delay((d, i) => i * 2)
         .attr("r", function (d) {
             return (d.budget / 30000000) + 3;
         });
 
     chart2.append("text")
-        .attr("x", width - 700)
-        .attr("y", height - 5)
+        .attr("x", baseWidth - 700)
+        .attr("y", baseHeight - 5)
         .text("Popularity of the Total Cast (FB Likes)");
 
 
@@ -479,11 +685,11 @@ function drawDotChart() {
 
     chart2
         .append("g") // create a group node
-        .attr("transform", "translate(0," + (width - 20) + ")")
+        .attr("transform", "translate(0," + (baseHeight - 20) + ")")
         .call(xAxis2) // call the axis generator
         .append("text")
         .attr("class", "label")
-        .attr("x", width - 16)
+        .attr("x", baseWidth - 16)
         .attr("y", -6)
         .style("text-anchor", "end")
         .text("Popularity of the Director (FB Likes)");
@@ -502,6 +708,7 @@ function drawDotChart() {
         .text("IMDb Score (Out Of 10)");
 
     var brush1 = d3.brush()
+        .extent([[0, 0], [300, 470]])
         .on('start', brushStart1)
         .on('brush', brushMoving)
         .on('end', brushEnd);
@@ -509,6 +716,7 @@ function drawDotChart() {
     brushContainer1.call(brush1);
 
     var brush2 = d3.brush()
+        .extent([[0, 0], [300, 470]])
         .on('start', brushStart2)
         .on('brush', brushMoving2)
         .on('end', brushEnd);
@@ -615,13 +823,9 @@ function drawBarChart() {
         .attr("class", "chart")
         .attr("id", "chart3")
 
-    chart3.attr("width", width)
-        .attr("height", height)
-        .append("g")
-
-    let xScale3 = d3.scaleLinear().domain([0, 10]).range([0, width]);
-    let yScale3 = d3.scaleLinear().domain([600, 0]).range([height, 0]);
-    let yScaleAxis3 = d3.scaleLinear().domain([0, 600]).range([height, 0]);
+    let xScale3 = d3.scaleLinear().domain([0, 10]).range([0, baseWidth]);
+    let yScale3 = d3.scaleLinear().domain([600, 0]).range([baseHeight, 0]);
+    let yScaleAxis3 = d3.scaleLinear().domain([0, 600]).range([baseHeight, 0]);
 
     let xAxis3 = d3.axisBottom().scale(xScale3);
     let yAxis3 = d3.axisLeft().scale(yScaleAxis3);
@@ -650,7 +854,7 @@ function drawBarChart() {
         .attr("transform", "translate(0, 10)");
 
     chart3.append("g")
-        .attr("transform", "translate(70," + (width + 30) + ")")
+        .attr("transform", "translate(70," + (baseHeight + 30) + ")")
         .attr("class", "axis")
         .call(xAxis3);
 
@@ -672,16 +876,10 @@ function drawBarChart() {
         .attr("transform", "rotate(-90)")
         .text("Number of Movies");
 
-    // chart3.append("text")
-    //     .text("Frequency of IMDB Scores")
-    //     .attr("transform", "translate(150,  535)")
-    //     .attr("class", "chart3text")
-    //     .style("font", "27px Helvetica Neue")
-
     chart3.append("text")
-        .attr("x", width - 300)
-        .attr("y", height + 30)
-        .text("IMDB Scores from 0 to 10)");
+        .attr("x", baseWidth - 300)
+        .attr("y", baseHeight + 30)
+        .text("IMDB Scores from 0 to 10");
 }
 
 function hideBarChart() {
@@ -695,9 +893,7 @@ function drawStackedChart() {
 
     const stack_svg = svg.append('g')
         .attr("class", "chart")
-        .attr("id", "stackchart")
-        .attr("width", width)
-        .attr("height", height);
+        .attr("id", "stackchart");
 
 
     // List of groups = species here = value of the first column called group -> shown on the X axis
@@ -706,7 +902,7 @@ function drawStackedChart() {
     // Add X axis
     const x = d3.scaleBand()
         .domain(groups)
-        .range([0, width - 200])
+        .range([0, baseWidth - 200])
         .padding([0.2]);
 
     stack_svg.append("g")
@@ -724,9 +920,37 @@ function drawStackedChart() {
         .attr("transform", `translate(100,0)`)
         .call(d3.axisLeft(y));
 
+    // Create gradient for each genre
+    const genreGradients = {};
+    const genreColors = {
+        'Action': ['#e63946', '#c41e3a'],
+        'Adventure': ['#ffd700', '#ffaa00'],
+        'Animation': ['#00d4ff', '#0d47a1'],
+        'Comedy': ['#ff6b6b', '#ee5a6f'],
+        'Drama': ['#ffd700', '#ffaa00'],
+        'Horror': ['#c41e3a', '#8b0000'],
+        'Romance': ['#ff69b4', '#ff1493'],
+        'Sci-Fi': ['#00d4ff', '#0099cc'],
+        'Thriller': ['#9370db', '#7b68ee'],
+        'Documentary': ['#32cd32', '#228b22'],
+        'Family': ['#ffa500', '#ff8c00'],
+        'Fantasy': ['#ba55d3', '#9370db']
+    };
+
+    subgroups.forEach(genre => {
+        const colors = genreColors[genre] || ['#c0c0c0', '#8c8274'];
+        const grad = defs.append("linearGradient")
+            .attr("id", `gradient-${genre}`)
+            .attr("x1", "0%").attr("y1", "0%")
+            .attr("x2", "0%").attr("y2", "100%");
+        grad.append("stop").attr("offset", "0%").attr("stop-color", colors[0]).attr("stop-opacity", 1);
+        grad.append("stop").attr("offset", "100%").attr("stop-color", colors[1]).attr("stop-opacity", 1);
+        genreGradients[genre] = `url(#gradient-${genre})`;
+    });
+
     const color = d3.scaleOrdinal()
         .domain(subgroups)
-        .range(d3.schemeCategory10);
+        .range(subgroups.map(g => genreGradients[g] || d3.schemeCategory10[subgroups.indexOf(g)]));
 
     const parseDate = d3.timeParse("%Y");
 
@@ -744,7 +968,7 @@ function drawStackedChart() {
         d3.selectAll(".myRect").style("opacity", 0.2);
         d3.selectAll(`.${subgroupName}`).style("opacity", 1);
 
-        // Grey out all legends                                   
+        // Grey out all legends
         let genre = '';
         genre = subgroupName;
 
@@ -842,13 +1066,23 @@ function drawStackedChart() {
                 return y1(review);
             });
 
-        // Add the valueline path.
+        // Add the valueline path with gradient
+        const lineGradient = defs.append("linearGradient")
+            .attr("id", `lineGradient-${genre}`)
+            .attr("x1", "0%").attr("y1", "0%")
+            .attr("x2", "100%").attr("y2", "0%");
+        const lineColors = genreColors[genre] || ['#c0c0c0', '#8c8274'];
+        lineGradient.append("stop").attr("offset", "0%").attr("stop-color", lineColors[0]);
+        lineGradient.append("stop").attr("offset", "100%").attr("stop-color", lineColors[1]);
+
         var path = svg.append("path")
             .data([new_data])
             .attr("class", "line")
             .attr("d", valueline)
-            .style('stroke', color(genre))
-            .style('fill', "None");
+            .style('stroke', `url(#lineGradient-${genre})`)
+            .style('fill', "None")
+            .style('stroke-width', 3)
+            .attr("filter", "url(#glow)");
 
         // Variable to Hold Total Length
         var totalLength = path.node().getTotalLength();
@@ -857,15 +1091,15 @@ function drawStackedChart() {
         path
             .attr("stroke-dasharray", totalLength + " " + totalLength)
             .attr("stroke-dashoffset", totalLength)
-            .transition() // Call Transition Method
-            .duration(4000) // Set Duration timing (ms)
-            .ease(d3.easeLinear) // Set Easing option
-            .attr("stroke-dashoffset", 0); // Set final value of dash-offset for transition
+            .transition()
+            .duration(4000)
+            .ease(d3.easeCubicInOut)
+            .attr("stroke-dashoffset", 0);
 
         // Add the X Axis
         svg.append("g")
             .attr("class", "axis")
-            .attr("transform", "translate(0," + (height - 150) + ")")
+            .attr("transform", "translate(0," + (baseHeight - 150) + ")")
             .call(d3.axisBottom(x1).tickFormat(d3.timeFormat(parseDate)))
             .selectAll("text")
             .data(new_data)
@@ -908,8 +1142,8 @@ function drawStackedChart() {
         // Add X axis label:
         svg.append("text")
             .attr("text-anchor", "end")
-            .attr("x", (width - 400))
-            .attr("y", height - 110 + margin.top)
+            .attr("x", (baseWidth - 400))
+            .attr("y", baseHeight - 110 + margin.top)
             .text("Year");
 
         // Y axis label:
